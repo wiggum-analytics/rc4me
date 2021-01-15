@@ -12,6 +12,6 @@ setup(
     license="MIT License",
     entry_points="""
         [console_scripts]
-        rc4mw=rc4me.run:cli
+        rc4me=rc4me.run:cli
     """
 )
