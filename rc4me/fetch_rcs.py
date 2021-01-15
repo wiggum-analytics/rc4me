@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 @click.command()
 @click.argument("repo", type=str)
-def _fetch_rcs_cli(repo: str) -> None:
+def _fetch_rcs_cli(rc4me_home: Path, repo: str) -> None:
     """CLI wrapper for fetch_rcs function.
 
     Args:
@@ -21,10 +21,10 @@ def _fetch_rcs_cli(repo: str) -> None:
         None
 
     """
-    fetch_rcs(repo)
+    fetch_rcs(rc4me_home, repo)
 
 
-def fetch_rcs(repo: str) -> None:
+def fetch_rcs(rc4me_home: Path, repo: str) -> None:
     """Clone RC repository to local directory.
 
     Clones rc4me repository to rc4me home directory at $HOME/.rc4me. If the
@@ -38,11 +38,10 @@ def fetch_rcs(repo: str) -> None:
         None
 
     """
-    rc4me_dir = Path.home() / ".rc4me"
-    repo_dir = Path(rc4me_dir, repo)
+    repo_dir = rc4me_home / repo
     # Check if the repo is local first
-    if not rc4me_dir.exists():
-        init_rc4me(rc4me_dir)
+    if not rc4me_home.exists():
+        init_rc4me(rc4me_home)
     if repo_dir.exists():
         # If the repo exists, fetch and update
         fetch_info = git.Repo(repo_dir).remote("origin").fetch()
@@ -59,7 +58,7 @@ def fetch_rcs(repo: str) -> None:
         else:
             # Otherwise, clone it from github
             git.Repo.clone_from(
-                f"git@github.com:{repo}", repo_dir, branch="master", depth=1
+                f"https://github.com/{repo}", repo_dir, branch="master", depth=1
             )
 
 
@@ -69,20 +68,20 @@ def _check_if_overwrite(repo: str) -> bool:
     return confirm.lower() == "y"
 
 
-def init_rc4me(rc4me_dir: Path) -> None:
+def init_rc4me(rc4me_home: Path) -> None:
     """Scaffold rc4me directory structure.
 
     Args:
-        rc4me_dir: Path to rc4me home folder.
+        rc4me_home: Path to rc4me home folder.
 
     Returns:
         None
 
     """
     # Allow this to fail if e.g. parent dir doesn't exist
-    rc4me_dir.mkdir()
-    Path(rc4me_dir / "init").mkdir()
-    Path(rc4me_dir / "prev").symlink_to(rc4me_dir / "init")
+    rc4me_home.mkdir()
+    Path(rc4me_home / "init").mkdir()
+    Path(rc4me_home / "prev").symlink_to(rc4me_home / "init")
 
 
 if __name__ == "__main__":
