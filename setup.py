@@ -8,6 +8,10 @@ setup(
     url="",
     version="0.0.0",
     packages=find_packages(),
-    install_requires=[],
+    install_requires=["Click"],
     license="MIT License",
+    entry_points="""
+        [console_scripts]
+        rc4mw=rc4me.run:cli
+    """
 )
