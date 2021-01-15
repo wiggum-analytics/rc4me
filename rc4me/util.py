@@ -5,9 +5,6 @@ from pathlib import Path
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-DESTINATION_DIR = "./"
-SOURCE_DIR = "~/rc4me/"
-
 
 def copyfiles(source_dir: str, destination_dir: str):
     """Copy files from source to (hidden) destination
