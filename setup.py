@@ -13,4 +13,5 @@ setup(
     entry_points="""
         [console_scripts]
         rc4me=rc4me.run:cli
+    """,
 )
