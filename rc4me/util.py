@@ -29,6 +29,9 @@ def copyfiles(source_dir: str, destination_dir: str):
     destin_path = Path(destination_dir)
     logger.info(f"Moving files from {source_path} to {destin_path}")
     for f in source_path.glob("*"):
+        # Skip copying the .git directory and README file (stop-gap)
+        if f.name == ".git" or "README" in f.name:
+            continue
         new_path = destin_path / f".{f.name}"
         logger.info(f"Moving {f}->{new_path}")
         shutil.copy(f, new_path)
