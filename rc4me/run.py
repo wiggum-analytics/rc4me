@@ -5,10 +5,10 @@ DESTINATION_DIR = "./"
 SOURCE_DIR = "~/rc4me/"
 
 
-def main():
+def cli():
     """Run copyfiles"""
     copyfiles(SOURCE_DIR, DESTINATION_DIR)
 
 
 if __name__ == "__main__":
-    main()
+    cli()
