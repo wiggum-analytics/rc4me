@@ -5,8 +5,7 @@ from typing import Optional, Dict
 import logging
 import click
 
-from rc4me.util import RcDirs, link_files
-from rc4me.fetch_repo import fetch_repo
+from rc4me.util import RcDirs, fetch_repo, link_files
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
