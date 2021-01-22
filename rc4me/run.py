@@ -1,39 +1,30 @@
 """TODO - Docstring."""
 
-import sys
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Dict
 import logging
 import click
 
 from rc4me.util import RcDirs, link_files
-from rc4me.prepare_repo import prepare_repo
+from rc4me.fetch_repo import fetch_repo
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
-@click.command()
+@click.group()
 # Allow calling function without an argument for --revert or --reset options
-@click.argument("repo", required=False, type=str)
 @click.option("--dest", type=click.Path())
 @click.option("--home", type=click.Path())
-@click.option("--revert", is_flag=True)
-@click.option("--reset", is_flag=True)
+@click.pass_context
 def cli(
-    repo: Optional[str] = None,
+    ctx: Dict[str, RcDirs],
     home: Optional[str] = None,
     dest: Optional[str] = None,
-    revert: bool = False,
-    reset: bool = False,
 ) -> None:
-    """Fetch dotfile repo and link rc files to destination."""
+    """Initialize rc4me home directory and call rc4me subcommands."""
     # If the command was called without any arguments or options
-    if repo is None and not (revert or reset):
-        # TODO--Show user help
-        logger.warning(f"Usage: {sys.argv[0]} [options] <repo_name>")
-        sys.exit(1)
-    # Set up defaults
+    ctx.ensure_object(dict)
     if home is None:
         home = Path.home() / ".rc4me"
     else:
@@ -42,10 +33,65 @@ def cli(
         dest = Path.home()
     else:
         dest = Path(dest)
-    # Init rc4me directory variables
-    rc_dirs = RcDirs(repo, home, dest)
+
+    ctx.obj["rc_dirs"] = RcDirs(home, dest)
+
+
+@click.argument("repo", required=True, type=str)
+@cli.command()
+@click.pass_context
+def get(ctx: Dict[str, RcDirs], repo: str):
+    """Switch rc4me environment to target repo.
+
+    Replaces rc files in rc4me home directory with symlinks to files located in
+    target repo. If the target repo does not exist in the rc4me home directory,
+    the repo is cloned either locally or from GitHub.
+
+    Args:
+        repo: Target repo with rc files. May be a local repo or reference a
+            GitHub repository (e.g. jeffmm/vimrc).
+    """
+    rc_dirs = ctx.obj["rc_dirs"]
+    # Init repo variables
+    rc_dirs.set_repo(repo)
     # Clone repo to rc4me home dir or update existing local config repo
-    prepare_repo(rc_dirs, revert, reset)
+    fetch_repo(rc_dirs)
+    # Wait to relink current until after _fetch_repo, since it could fail if
+    # the git repo doesn't exist or similar.
+    rc_dirs.relink_current_to(rc_dirs.source)
+    # Link rc4me target config to destination
+    link_files(rc_dirs)
+
+
+@cli.command()
+@click.pass_context
+def revert(ctx: Dict[str, RcDirs]):
+    """Revert to previous rc4me configuration.
+
+    Removes changes from most recent rc4me command and reverts to previous
+    configuration.
+    """
+    # Init rc4me directory variables
+    rc_dirs = ctx.obj["rc_dirs"]
+    logger.info("Reverting rc4me config to previous configuration")
+    rc_dirs.relink_current_to(rc_dirs.prev.resolve())
+    # Link rc4me target config to destination
+    link_files(rc_dirs)
+
+
+@cli.command()
+@click.pass_context
+def reset(ctx: Dict[str, RcDirs]):
+    """Reset to initial rc4me configuration.
+
+    Restores the rc4me destination directory rc files to the user's initial
+    configuration. If any files were overwritten by rc4me at any point, they
+    will be copied back into the rc4me destination directory.
+    """
+    # Init rc4me directory variables
+    rc_dirs = ctx.obj["rc_dirs"]
+    logger.info("Restoring rc4me config to initial configuration")
+    rc_dirs.relink_current_to(rc_dirs.init)
     # Link rc4me target config to destination
     link_files(rc_dirs)
 
