@@ -10,6 +10,9 @@ build-docker:
 bash: build-docker
 	docker run -it $(IMAGE):latest bash
 
+dev: build-docker
+	docker run -v ${PWD}:/mnt -w /mnt -it $(IMAGE):latest bash
+
 ci-black: build-docker ## Test lint compliance using black. Config in pyproject.toml file
 	docker run -it $(IMAGE) black --check $(PROJ_DIR)
 
