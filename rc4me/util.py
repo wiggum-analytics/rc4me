@@ -2,8 +2,8 @@
 
 import logging
 import shutil
-from typing import Optional
 from pathlib import Path
+import git
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -13,9 +13,7 @@ logger = logging.getLogger(__name__)
 class RcDirs:
     """Class for storing and manipulating rc4me home directory structure."""
 
-    def __init__(
-        self, target_config: Optional[str], rc4me_home: Path, rc4me_dest: Path
-    ):
+    def __init__(self, rc4me_home: Path, rc4me_dest: Path):
         """Initialize paths to home and source rc4me config repos.
 
         Creates attributes `source`, which is the path to the
@@ -23,30 +21,32 @@ class RcDirs:
         directory.
 
         Args:
-            target_config: Path to local rc repo or remote rc repo name. If
-                None, home variables are initialized, but no source repo is
-                defined.
             rc4me_home: Path to rc4me home directory.
             rc4me_dest: Directory to copy rc files to.
         """
-        # Git/local repo from which to clone rc config
-        self.target = target_config
         # Directory that holds all cloned rc config repos, and init, prev, current
         self.home = rc4me_home
         # Directory to copy rc4me files to (e.g. $HOME)
         self.dest = rc4me_dest
         # Init rc4me home dir variables (init, prev, current)
         self._init_rc4me_home()
-        if self.target is None:
-            return
-        self.target_is_local = Path(self.target).expanduser().exists()
+        # Initialize repo variables
+        self.repo = None
+        self.source = None
+        self.repo_is_local = None
+
+    def set_repo(self, repo: str):
+        """Set repo path to clone."""
+        # Git/local repo from which to clone rc config
+        self.repo = repo
+        self.repo_is_local = Path(self.repo).expanduser().exists()
         # Init self.source attribute, which will be the path to local repo in
         # rc4me_home with target config
-        if self.target_is_local:
-            self.target = str(Path(self.target).expanduser())
-            self.source = self.home / Path(self.target).name
+        if self.repo_is_local:
+            self.repo = str(Path(self.repo).expanduser())
+            self.source = self.home / Path(self.repo).name
         else:
-            self.source = self.home / self.target
+            self.source = self.home / self.repo
 
     def relink_current_to(self, target: Path):
         """Change current symlink to point to target path."""
@@ -101,7 +101,6 @@ def link_files(rc_dirs: RcDirs):
     # If we are restoring the initial config, copy the files rather than
     # link them, so that the user can safely delete their rc4me home dir
     copy_files = source_path.resolve() == rc_dirs.init
-    logger.info(f"Moving files from {source_path} to {destin_path}")
     for f in source_path.glob("*"):
         # Skip copying any directories or README files for now (stop-gap)
         # TODO -- add ability to copy/link directories
@@ -127,3 +126,51 @@ def link_files(rc_dirs: RcDirs):
             # opposite the copy syntax, which may lead to confusion...)
             logger.info(f"Linking {new_path}->{f}")
             new_path.symlink_to(f)
+
+
+def fetch_repo(rc_dirs: RcDirs) -> None:
+    """Clone RC repository to local directory.
+
+    Clones rc4me repository to rc4me home directory at $HOME/.rc4me. If the
+    repo already exists locally, fetch updates and confirm update to origin
+    master. If the .rc4me home directory does not exist, scaffold it.
+
+    Args:
+        rc_dirs: Data for rc home directory and rc4me target config.
+
+    Returns:
+        None
+    """
+
+    def _check_if_overwrite() -> bool:
+        """Get user confirmation to pull new changes to rc repo."""
+        confirm = input(
+            f"Repository {rc_dirs.repo} has new updates. Pull changes? (y/N): "
+        )
+        return confirm.lower() == "y"
+
+    # First check whether the repo is already cloned in the home directory
+    if rc_dirs.source.exists():
+        repo = git.Repo(rc_dirs.source)
+        # Fetch any changes from origin
+        fetch_info = repo.remote("origin").fetch()
+        # Check that the local repo is up to date
+        if fetch_info[0].commit.hexsha != repo.head.commit.hexsha:
+            # Update the repo on user confirmation
+            if _check_if_overwrite():
+                repo.remote("origin").pull("master")
+    # If the repo is a local directory, clone from the local directory
+    elif rc_dirs.repo_is_local:
+        # If the path refers to a local directory, assume the directory is a git repo
+        logger.info(f"Cloning directory {rc_dirs.repo}")
+        git.Repo(rc_dirs.repo).clone(rc_dirs.source, branch="master", depth=1)
+    # Otherwise assume the repo refers to a remote GitHub repository
+    else:
+        # Clone from GitHub to the rc4me_home directory
+        logger.info(f"Cloning GitHub repo {rc_dirs.repo}")
+        git.Repo.clone_from(
+            f"https://github.com/{rc_dirs.repo}",
+            rc_dirs.source,
+            branch="master",
+            depth=1,
+        )
