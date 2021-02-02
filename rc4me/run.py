@@ -5,7 +5,7 @@ from typing import Optional, Dict
 import logging
 import click
 
-from rc4me.util import RcDirs, fetch_repo, link_files
+from rc4me.util import RcDirs
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -52,15 +52,14 @@ def get(ctx: Dict[str, RcDirs], repo: str):
     """
     rc_dirs = ctx.obj["rc_dirs"]
     # Init repo variables
-    rc_dirs.set_repo(repo)
-    logger.info("Getting and setting rc4me config: {repo}")
+    logger.info(f"Getting and setting rc4me config: {repo}")
     # Clone repo to rc4me home dir or update existing local config repo
-    fetch_repo(rc_dirs)
+    rc_dirs.fetch_repo(repo)
     # Wait to relink current until after _fetch_repo, since it could fail if
     # the git repo doesn't exist or similar.
-    rc_dirs.relink_current_to(rc_dirs.source)
+    rc_dirs.relink_current_to(rc_dirs.repo)
     # Link rc4me target config to destination
-    link_files(rc_dirs)
+    rc_dirs.link_files()
 
 
 @cli.command()
@@ -76,7 +75,7 @@ def revert(ctx: Dict[str, RcDirs]):
     logger.info("Reverting rc4me config to previous configuration")
     rc_dirs.relink_current_to(rc_dirs.prev.resolve())
     # Link rc4me target config to destination
-    link_files(rc_dirs)
+    rc_dirs.link_files()
 
 
 @cli.command()
@@ -93,7 +92,7 @@ def reset(ctx: Dict[str, RcDirs]):
     logger.info("Restoring rc4me config to initial configuration")
     rc_dirs.relink_current_to(rc_dirs.init)
     # Link rc4me target config to destination
-    link_files(rc_dirs)
+    rc_dirs.link_files()
 
 
 if __name__ == "__main__":
