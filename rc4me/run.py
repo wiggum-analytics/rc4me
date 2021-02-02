@@ -21,7 +21,7 @@ def cli(
     home: Optional[str] = None,
     dest: Optional[str] = None,
 ) -> None:
-    """Initialize rc4me home directory and call rc4me subcommands."""
+    """Management for rc4me run commands."""
     # If the command was called without any arguments or options
     ctx.ensure_object(dict)
     if home is None:
@@ -53,6 +53,7 @@ def get(ctx: Dict[str, RcDirs], repo: str):
     rc_dirs = ctx.obj["rc_dirs"]
     # Init repo variables
     rc_dirs.set_repo(repo)
+    logger.info("Getting and setting rc4me config: {repo}")
     # Clone repo to rc4me home dir or update existing local config repo
     fetch_repo(rc_dirs)
     # Wait to relink current until after _fetch_repo, since it could fail if
