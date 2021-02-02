@@ -7,6 +7,7 @@ import click
 
 from rc4me.util import RcDirs, fetch_repo, link_files
 
+
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
