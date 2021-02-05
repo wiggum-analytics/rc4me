@@ -11,13 +11,13 @@ bash: build-docker
 	docker run -it $(IMAGE):latest bash
 
 ci-black: build-docker ## Test lint compliance using black. Config in pyproject.toml file
-	docker run -it $(IMAGE) black --check $(PROJ_DIR)
+	docker run --rm $(IMAGE) black --check $(PROJ_DIR)
 
 ci-flake8: build-docker ## Test lint compliance using flake8. Config in tox.ini file
-	docker run -it $(IMAGE) flake8 $(PROJ_DIR)
+	docker run --rm $(IMAGE) flake8 $(PROJ_DIR)
 
 ci-test: build-docker ## Runs unit tests using pytest
-	docker run -it $(IMAGE) pytest $(PROJ_DIR)
+	docker run --rm $(IMAGE) pytest $(PROJ_DIR)
 
 ci: ci-black ci-flake8 ci-test ## Check black, flake8, and run unit tests
 	@echo "CI sucessful"
