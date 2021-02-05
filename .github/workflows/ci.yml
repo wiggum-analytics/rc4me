@@ -1,0 +1,12 @@
+name: Continuous Integration
+
+on: [push]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Run CI
+        run: make ci
