@@ -3,7 +3,7 @@ from setuptools import find_packages, setup
 setup(
     name="rc4me",
     author="Michael Stefferson/Jeffrey Moore",
-    author_email="na@gmail.com",
+    author_email="mstefferson@gmail.com",
     description="Description",
     url="",
     version="0.0.0",
