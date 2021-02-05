@@ -1,9 +1,9 @@
-FROM manifoldai/orbyter-ml-dev:3.1
+FROM python:3.8
 
 WORKDIR /app/
-COPY setup.py /app/setup.py
 COPY rc4me /app/rc4me
-COPY tox.ini myproject.toml /app/
+COPY setup.py tox.ini myproject.toml /app/
 RUN pip install -e /app/
-
+COPY requirements.txt /app
+RUN pip install -r requirements.txt
 WORKDIR /app/

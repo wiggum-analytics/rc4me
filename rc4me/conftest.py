@@ -1,5 +1,3 @@
-import filecmp  # use .samefile
-
 import pytest
 
 
