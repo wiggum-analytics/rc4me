@@ -37,11 +37,16 @@ class RcDirs:
         """Check if current config is init."""
         return self.current.resolve() == self.init
 
-    def _unlink_current(self):
-        """Remove symlinks to current config."""
+    def _cleanup_links_to_current(self):
+        """Remove symlinks in the home directory that link to files in current."""
         if self._current_is_init():
+            # If current points to init config, then the files in current are
+            # not symlinks and should not be unlinked. Real files will always be
+            # copied to init if they are overwritten by a symlink.
             return
         for link, source in self._generate_link_paths():
+            # For each file in the current directory, check if the file is symlinked
+            # to home, and if so, unlink it from home
             if link.is_symlink() and link.resolve() == source.resolve():
                 logger.info(f"Unlinking {link}")
                 link.unlink()
@@ -82,12 +87,12 @@ class RcDirs:
             )
             self.current.symlink_to(self.init)
 
-    def relink_current_to(self, target: Path):
+    def change_current_to_target(self, target: Path):
         """Change current symlink to point to target path."""
         # Fail early before we unlink anything
         if not (target and target.exists()):
             raise FileExistsError("Relink target not found.")
-        self._unlink_current()
+        self._cleanup_links_to_current()
         # Update prev symlink to point to current
         self.prev.unlink()
         self.prev.symlink_to(self.current.resolve())
