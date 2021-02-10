@@ -107,17 +107,18 @@ def swap(ctx: Dict[str, RcDirs]):
     # Init rc4me directory variables
     rc_dirs = ctx.obj["rc_dirs"]
     repos = rc_dirs.find_rc_repos()
-    names = [p.name for p in repos]
-    logger.info(f"Disploy rc4me dirs {repos}")
-    logger.info(f"Disploy rc4me names {names}")
+    my_name = {p.name: p for p in repos}
+    logger.info(f"Disploy rc4me names {my_name.keys()}")
     # Show all dirs that aren't curr/prev
-    from cursesmenu import SelectionMenu, CursesMenu
-    selection_menu = SelectionMenu(names)
-    menu = CursesMenu("Title", "Subtitle")
-    menu.append_item(selection_menu)
-    menu.show()
-    menu.get_input()
+    from pick import pick
 
+    title = 'Please choose your favorite programming language: '
+    options = list(my_name.keys())
+    # print(names)
+    print(options)
+    option, _ = pick(options, title)
+    print(option)
+    print(my_name[option])
 
 
 if __name__ == "__main__":

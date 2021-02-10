@@ -8,7 +8,7 @@ setup(
     url="",
     version="0.0.0",
     packages=find_packages(),
-    install_requires=["click>=7.1.2"],
+    install_requires=["click>=7.1.2", "pick>=1.0.0"],
     python_requires=">=3.8",
     license="MIT License",
     entry_points="""
