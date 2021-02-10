@@ -191,3 +191,10 @@ class RcDirs:
                 # Symlink the source rc files to the new path.
                 logger.info(f"Linking {source_path}->{link_path}")
                 link_path.symlink_to(source_path)
+
+
+    def find_rc_repos(self):
+        dirs = [p for p in self.home.glob("*") if p.name not in ["current", "prev"]]
+        return dirs
+
+
