@@ -1,12 +1,13 @@
 """TODO - Docstring."""
 
-from pathlib import Path
-from typing import Optional, Dict
 import logging
+from pathlib import Path
+from typing import Dict, Optional
+
 import click
+from pick import pick
 
 from rc4me.util import RcDirs
-
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -99,26 +100,22 @@ def reset(ctx: Dict[str, RcDirs]):
 
 @cli.command()
 @click.pass_context
-def swap(ctx: Dict[str, RcDirs]):
+def select(ctx: Dict[str, RcDirs]):
     """Swap rc4me configurations
 
-    TODO
+    Displays all available repos and allow user to select one
     """
     # Init rc4me directory variables
     rc_dirs = ctx.obj["rc_dirs"]
-    repos = rc_dirs.find_rc_repos()
-    my_name = {p.name: p for p in repos}
-    logger.info(f"Disploy rc4me names {my_name.keys()}")
+    my_repos = rc_dirs.get_rc_repos()
     # Show all dirs that aren't curr/prev
-    from pick import pick
-
-    title = 'Please choose your favorite programming language: '
-    options = list(my_name.keys())
-    # print(names)
-    print(options)
-    option, _ = pick(options, title)
-    print(option)
-    print(my_name[option])
+    title = "Please select the run commands repo you want to use: "
+    options = list(my_repos.keys())
+    selected, _ = pick(options, title)
+    logger.info(f"Selected and applying: {my_repos[selected]}")
+    rc_dirs.change_current_to_target(my_repos[selected])
+    # TODO, should just just be part of change_current_to_target?
+    rc_dirs.link_files()
 
 
 if __name__ == "__main__":

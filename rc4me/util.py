@@ -3,8 +3,9 @@
 import logging
 import shutil
 from pathlib import Path
-import git
+from typing import Dict
 
+import git
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -184,7 +185,6 @@ class RcDirs:
                 link_path.unlink()
             # Copy files if we are changing config to init.
             if copy_files:
-                # Copy the files from the source to the new path
                 logger.info(f"Copying {source_path}->{link_path}")
                 shutil.copy(source_path, link_path)
             else:
@@ -192,9 +192,13 @@ class RcDirs:
                 logger.info(f"Linking {source_path}->{link_path}")
                 link_path.symlink_to(source_path)
 
+    def get_rc_repos(self) -> Dict[str, Path]:
+        """Searches home dir and grabs all the rc repos it finds
 
-    def find_rc_repos(self):
+        Excludes "current" and "prev".
+
+        Returns:
+            Map with key repo name, value repo Path
+        """
         dirs = [p for p in self.home.glob("*") if p.name not in ["current", "prev"]]
-        return dirs
-
-
+        return {p.name: p for p in dirs}
