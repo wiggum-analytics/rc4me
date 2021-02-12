@@ -1,11 +1,7 @@
 from pathlib import Path
 from click.testing import CliRunner
 from rc4me.run import cli
-
-
-def test_pass():
-    """ Temp test before any written"""
-    pass
+from rc4me.util import RcDirs
 
 
 def check_repo_files_in_home(repo: Path):
@@ -18,21 +14,42 @@ def check_repo_files_in_home(repo: Path):
 
 def test_get():
     runner = CliRunner()
-    result = runner.invoke(cli, ["get", "jeffmm/vimrc"])
+    result = runner.invoke(cli, ["get", "mstefferson/rc-demo"])
     assert result.exit_code == 0
-    repo = Path("~/.rc4me/jeffmm_vimrc").expanduser()
+    repo = Path("~/.rc4me/mstefferson_rc-demo").expanduser()
     assert repo.exists()
     assert repo.is_dir()
     check_repo_files_in_home(repo)
 
 
 def test_revert():
-    pass
+    runner = CliRunner()
+    result = runner.invoke(cli, ["get", "mstefferson/rc-demo"])
+    assert result.exit_code == 0
+    ms_repo = Path("~/.rc4me/mstefferson_rc-demo").expanduser()
+    check_repo_files_in_home(ms_repo)
+    result = runner.invoke(cli, ["get", "jeffmm/vimrc"])
+    assert result.exit_code == 0
+    jm_repo = Path("~/.rc4me/jeffmm_vimrc").expanduser()
+    check_repo_files_in_home(jm_repo)
+    result = runner.invoke(cli, ["revert"])
+    assert result.exit_code == 0
+    check_repo_files_in_home(ms_repo)
 
 
 def test_reset():
-    pass
+    runner = CliRunner()
+    result = runner.invoke(cli, ["get", "mstefferson/rc-demo"])
+    repo = Path("~/.rc4me/mstefferson_rc-demo").expanduser()
+    assert result.exit_code == 0
+    result = runner.invoke(cli, ["reset"])
+    assert result.exit_code == 0
+    repo = Path("~/.rc4me/init").expanduser()
+    check_repo_files_in_home(repo)
 
 
-def test_get_local():
-    pass
+def test_rcdirs_get_rc_repo(tmp_path, rc1, rc2):
+    rcdirs = RcDirs(tmp_path, "./")
+    found_rcs = rcdirs.get_rc_repos()
+    expected_rcs = {rc1.name: rc1, rc2.name: rc2, "init": tmp_path / "init"}
+    assert found_rcs == expected_rcs
