@@ -1,7 +1,6 @@
 from pathlib import Path
 from click.testing import CliRunner
 from rc4me.run import cli
-from rc4me.util import RcDirs
 
 
 def check_repo_files_in_home(repo: Path):
@@ -46,10 +45,3 @@ def test_reset():
     assert result.exit_code == 0
     repo = Path("~/.rc4me/init").expanduser()
     check_repo_files_in_home(repo)
-
-
-def test_rcdirs_get_rc_repo(tmp_path, rc1, rc2):
-    rcdirs = RcDirs(tmp_path, "./")
-    found_rcs = rcdirs.get_rc_repos()
-    expected_rcs = {rc1.name: rc1, rc2.name: rc2, "init": tmp_path / "init"}
-    assert found_rcs == expected_rcs
