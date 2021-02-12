@@ -58,7 +58,8 @@ def get(ctx: Dict[str, RcDirs], repo: str):
     rc_dirs.fetch_repo(repo)
     # Wait to relink current until after _fetch_repo, since it could fail if
     # the git repo doesn't exist or similar.
-    rc_dirs.change_current_to_target(rc_dirs.repo)
+    # rc_dirs.change_current_to_target(rc_dirs.repo)
+    rc_dirs.change_current_to_fetched_repo()
     # Link rc4me target config to destination
     rc_dirs.link_files()
 
@@ -74,7 +75,7 @@ def revert(ctx: Dict[str, RcDirs]):
     # Init rc4me directory variables
     rc_dirs = ctx.obj["rc_dirs"]
     logger.info("Reverting rc4me config to previous configuration")
-    rc_dirs.change_current_to_target(rc_dirs.prev.resolve())
+    rc_dirs.change_current_to_prev()
     # Link rc4me target config to destination
     rc_dirs.link_files()
 
@@ -91,7 +92,7 @@ def reset(ctx: Dict[str, RcDirs]):
     # Init rc4me directory variables
     rc_dirs = ctx.obj["rc_dirs"]
     logger.info("Restoring rc4me config to initial configuration")
-    rc_dirs.change_current_to_target(rc_dirs.init)
+    rc_dirs.change_current_to_init()
     # Link rc4me target config to destination
     rc_dirs.link_files()
 

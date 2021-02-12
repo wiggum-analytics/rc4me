@@ -31,7 +31,7 @@ class RcDirs:
         # Init rc4me home dir variables (init, prev, current)
         self._init_rc4me_home()
         # Directory holding source file repo
-        self.repo = None
+        self.repo_path = None
 
     def _current_is_init(self):
         """Check if current config is init."""
@@ -87,7 +87,19 @@ class RcDirs:
             )
             self.current.symlink_to(self.init)
 
-    def change_current_to_target(self, target: Path):
+    def change_current_to_fetched_repo(self):
+        """Change current symlink to recently-fetched repo."""
+        self._change_current_to_target(self.repo_path)
+
+    def change_current_to_prev(self):
+        """Change current symlink to previous rc4me config."""
+        self._change_current_to_target(self.prev.resolve())
+
+    def change_current_to_init(self):
+        """Change current symlink to initial rc4me config."""
+        self._change_current_to_target(self.init)
+
+    def _change_current_to_target(self, target: Path):
         """Change current symlink to point to target path."""
         # Fail early before we unlink anything
         if not (target and target.exists()):
@@ -118,13 +130,14 @@ class RcDirs:
         repo_is_local = Path(repo).expanduser().exists()
         if repo_is_local:
             repo = str(Path(repo).expanduser())
-            self.repo = self.home / Path(repo).name
+            self.repo_path = self.home / Path(repo).name
         else:
-            self.repo = self.home / repo
+            repo_local = repo.replace("/", "_")
+            self.repo_path = self.home / repo_local
 
         # First check whether the repo is already cloned in the home directory
-        if self.repo.exists():
-            r = git.Repo(self.repo)
+        if self.repo_path.exists():
+            r = git.Repo(self.repo_path)
             # Fetch any changes from origin
             fetch_info = r.remote("origin").fetch()
             # Check that the local repo is up to date
@@ -136,14 +149,14 @@ class RcDirs:
         elif repo_is_local:
             # If the path refers to a local directory, assume it is a git repo
             logger.info(f"Cloning directory {repo}")
-            git.Repo(repo).clone(self.repo, branch="master", depth=1)
+            git.Repo(repo).clone(self.repo_path, branch="master", depth=1)
         # Otherwise assume the repo refers to a remote GitHub repository
         else:
             # Clone from GitHub to the rc4me_home directory
             logger.info(f"Cloning GitHub repo {repo}")
             git.Repo.clone_from(
                 f"https://github.com/{repo}",
-                self.repo,
+                self.repo_path,
                 branch="master",
                 depth=1,
             )

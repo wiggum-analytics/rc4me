@@ -9,6 +9,7 @@ def test_pass():
 
 
 def check_repo_files_in_home(repo: Path):
+    """Check that files in a repo are in the rc4me destination dir."""
     home_rcs = [f.name for f in Path("~").expanduser().glob(".*")]
     for f in repo.glob("*"):
         if f.is_file() and f.suffix != ".md":
@@ -19,7 +20,7 @@ def test_get():
     runner = CliRunner()
     result = runner.invoke(cli, ["get", "jeffmm/vimrc"])
     assert result.exit_code == 0
-    repo = Path("~/.rc4me/jeffmm/vimrc").expanduser()
+    repo = Path("~/.rc4me/jeffmm_vimrc").expanduser()
     assert repo.exists()
     assert repo.is_dir()
     check_repo_files_in_home(repo)
