@@ -1,12 +1,13 @@
 """TODO - Docstring."""
 
-from pathlib import Path
-from typing import Optional, Dict
 import logging
+from pathlib import Path
+from typing import Dict, Optional
+
 import click
+from pick import pick
 
 from rc4me.util import RcDirs
-
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -94,6 +95,26 @@ def reset(ctx: Dict[str, RcDirs]):
     logger.info("Restoring rc4me config to initial configuration")
     rc_dirs.change_current_to_init()
     # Link rc4me target config to destination
+    rc_dirs.link_files()
+
+
+@cli.command()
+@click.pass_context
+def select(ctx: Dict[str, RcDirs]):
+    """Swap rc4me configurations
+
+    Displays all available repos and allow user to select one
+    """
+    # Init rc4me directory variables
+    rc_dirs = ctx.obj["rc_dirs"]
+    my_repos = rc_dirs.get_rc_repos()
+    # Show all dirs that aren't curr/prev
+    title = "Please select the repo/configuration you want to use:"
+    options = list(my_repos.keys())
+    selected, _ = pick(options, title)
+    logger.info(f"Selected and applying: {my_repos[selected]}")
+    rc_dirs.change_current_to_repo(my_repos[selected])
+    # TODO, should just just be part of change_current_to_target?
     rc_dirs.link_files()
 
 

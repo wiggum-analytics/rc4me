@@ -3,8 +3,9 @@
 import logging
 import shutil
 from pathlib import Path
-import git
+from typing import Dict
 
+import git
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -99,6 +100,10 @@ class RcDirs:
         """Change current symlink to initial rc4me config."""
         self._change_current_to_target(self.init)
 
+    def change_current_to_repo(self, repo):
+        """Change current symlink to passed repo rc4me config."""
+        self._change_current_to_target(repo)
+
     def _change_current_to_target(self, target: Path):
         """Change current symlink to point to target path."""
         # Fail early before we unlink anything
@@ -184,10 +189,20 @@ class RcDirs:
                 link_path.unlink()
             # Copy files if we are changing config to init.
             if copy_files:
-                # Copy the files from the source to the new path
                 logger.info(f"Copying {source_path}->{link_path}")
                 shutil.copy(source_path, link_path)
             else:
                 # Symlink the source rc files to the new path.
                 logger.info(f"Linking {source_path}->{link_path}")
                 link_path.symlink_to(source_path)
+
+    def get_rc_repos(self) -> Dict[str, Path]:
+        """Searches home dir and grabs all the rc repos it finds
+
+        Excludes "current" and "prev".
+
+        Returns:
+            Map with key repo name, value repo Path
+        """
+        dirs = [p for p in self.home.glob("*") if p.name not in ["current", "prev"]]
+        return {p.name: p for p in dirs}
