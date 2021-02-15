@@ -109,11 +109,11 @@ def select(ctx: Dict[str, RcDirs]):
     rc_dirs = ctx.obj["rc_dirs"]
     my_repos = rc_dirs.get_rc_repos()
     # Show all dirs that aren't curr/prev
-    title = "Please select the run commands repo you want to use: "
+    title = "Please select the repo/configuration you want to use:"
     options = list(my_repos.keys())
     selected, _ = pick(options, title)
     logger.info(f"Selected and applying: {my_repos[selected]}")
-    rc_dirs.change_current_to_target(my_repos[selected])
+    rc_dirs.change_current_to_repo(my_repos[selected])
     # TODO, should just just be part of change_current_to_target?
     rc_dirs.link_files()
 

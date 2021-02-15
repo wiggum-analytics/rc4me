@@ -100,6 +100,10 @@ class RcDirs:
         """Change current symlink to initial rc4me config."""
         self._change_current_to_target(self.init)
 
+    def change_current_to_repo(self, repo):
+        """Change current symlink to passed repo rc4me config."""
+        self._change_current_to_target(repo)
+
     def _change_current_to_target(self, target: Path):
         """Change current symlink to point to target path."""
         # Fail early before we unlink anything
