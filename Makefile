@@ -26,7 +26,7 @@ ci: ci-black ci-flake8 ci-test ## Check black, flake8, and run unit tests
 	@echo "CI sucessful"
 
 isort: build-docker  ## Runs isort to sorts imports
-	docker run -v ${PWD}:/mnt -w /mnt -it $(IMAGE) isort -rc $(PROJ_DIR)
+	docker run -v ${PWD}:/mnt -w /mnt -it $(IMAGE) isort $(PROJ_DIR)
 
 black: build-docker ## Runs black auto-formater
 	docker run -v ${PWD}:/mnt -w /mnt -it $(IMAGE) black $(PROJ_DIR)
