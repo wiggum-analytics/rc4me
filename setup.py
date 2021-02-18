@@ -13,6 +13,6 @@ setup(
     license="MIT License",
     entry_points="""
         [console_scripts]
-        rc4me=rc4me.run:cli
+        rc4me=rc4me.cli:cli
     """,
 )
