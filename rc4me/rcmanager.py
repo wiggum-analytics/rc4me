@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class RcManager:
     """Class for storing and manipulating rc4me home directory structure."""
 
-    def __init__(self, rc4me_home: Path, rc4me_dest: Path):
+    def __init__(self, home: Path = Path.home() / ".rc4me", dest: Path = Path.home()):
         """Initialize paths to home and source rc4me config repos.
 
         Creates attributes `source`, which is the path to the
@@ -22,13 +22,13 @@ class RcManager:
         directory.
 
         Args:
-            rc4me_home: Path to rc4me home directory.
-            rc4me_dest: Directory to copy rc files to.
+            home: Path to rc4me home directory.
+            dest: Directory to copy rc files to.
         """
         # Directory that holds all cloned rc config repos, and init, prev, current
-        self.home = rc4me_home
+        self.home = home
         # Directory to copy rc4me files to (e.g. $HOME)
-        self.dest = rc4me_dest
+        self.dest = dest
         # Init rc4me home dir variables (init, prev, current)
         self._init_rc4me_home()
         # Directory holding source file repo
@@ -162,7 +162,7 @@ class RcManager:
             git.Repo(repo).clone(self.repo_path, branch="master", depth=1)
         # Otherwise assume the repo refers to a remote GitHub repository
         else:
-            # Clone from GitHub to the rc4me_home directory
+            # Clone from GitHub to the home directory
             logger.info(f"Cloning GitHub repo {repo}")
             git.Repo.clone_from(
                 f"https://github.com/{repo}",
@@ -176,7 +176,7 @@ class RcManager:
 
         Transfers files found in the rc4me source directory and creates
         symlinks of them in the rc4me destination directory. If the source
-        directory is rc4me_home/init, the files are copied instead, allowing a
+        directory is home/init, the files are copied instead, allowing a
         user to safely delete their rc4me home dir after a reset.
         """
         # If we are restoring the initial config, copy the files rather than
