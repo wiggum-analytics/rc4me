@@ -3,7 +3,6 @@ from pathlib import Path
 from click.testing import CliRunner
 
 from rc4me.run import cli
-from rc4me.util import RcDirs
 
 
 def check_repo_files_in_home(repo: Path):
