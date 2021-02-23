@@ -90,22 +90,22 @@ class RcDirs:
 
     def change_current_to_fetched_repo(self):
         """Change current symlink to recently-fetched repo."""
-        self._change_current_to_target(self.repo_path)
+        self._update_current_and_prev_repos_and_set(self.repo_path)
 
     def change_current_to_prev(self):
         """Change current symlink to previous rc4me config."""
-        self._change_current_to_target(self.prev.resolve())
+        self._update_current_and_prev_repos_and_set(self.prev.resolve())
 
     def change_current_to_init(self):
         """Change current symlink to initial rc4me config."""
-        self._change_current_to_target(self.init)
+        self._update_current_and_prev_repos_and_set(self.init)
 
     def change_current_to_repo(self, repo):
         """Change current symlink to passed repo rc4me config."""
-        self._change_current_to_target(repo)
+        self._update_current_and_prev_repos_and_set(repo)
 
-    def _change_current_to_target(self, target: Path):
-        """Change current symlink to point to target path."""
+    def _update_current_and_prev_repos(self, target: Path):
+        """Change current and previous symlink to point to target path."""
         # Fail early before we unlink anything
         if not (target and target.exists()):
             raise FileExistsError("Relink target not found.")
@@ -116,6 +116,11 @@ class RcDirs:
         # Update current to point to target
         self.current.unlink()
         self.current.symlink_to(target)
+
+    def _update_current_and_prev_repos_and_set(self, target: Path):
+        """Runs _update_current_and_prev_repos follow by _set_repo_files"""
+        self._update_current_and_prev_repos(target)
+        self._set_repo_files()
 
     def fetch_repo(self, repo: str):
         """Clone RC repository to local directory.
@@ -166,8 +171,8 @@ class RcDirs:
                 depth=1,
             )
 
-    def link_files(self):
-        """Link files from rc4me source to (hidden) destination.
+    def _set_repo_files(self):
+        """Link or copy files from rc4me source to (hidden) destination.
 
         Transfers files found in the rc4me source directory and creates
         symlinks of them in the rc4me destination directory. If the source

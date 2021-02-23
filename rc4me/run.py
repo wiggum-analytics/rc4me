@@ -57,12 +57,9 @@ def get(ctx: Dict[str, RcDirs], repo: str):
     logger.info(f"Getting and setting rc4me config: {repo}")
     # Clone repo to rc4me home dir or update existing local config repo
     rc_dirs.fetch_repo(repo)
-    # Wait to relink current until after _fetch_repo, since it could fail if
+    # Wait to relink current until after fetching repo, since it could fail if
     # the git repo doesn't exist or similar.
-    # rc_dirs.change_current_to_target(rc_dirs.repo)
     rc_dirs.change_current_to_fetched_repo()
-    # Link rc4me target config to destination
-    rc_dirs.link_files()
 
 
 @cli.command()
@@ -77,8 +74,6 @@ def revert(ctx: Dict[str, RcDirs]):
     rc_dirs = ctx.obj["rc_dirs"]
     logger.info("Reverting rc4me config to previous configuration")
     rc_dirs.change_current_to_prev()
-    # Link rc4me target config to destination
-    rc_dirs.link_files()
 
 
 @cli.command()
@@ -94,8 +89,6 @@ def reset(ctx: Dict[str, RcDirs]):
     rc_dirs = ctx.obj["rc_dirs"]
     logger.info("Restoring rc4me config to initial configuration")
     rc_dirs.change_current_to_init()
-    # Link rc4me target config to destination
-    rc_dirs.link_files()
 
 
 @cli.command()
@@ -114,8 +107,6 @@ def select(ctx: Dict[str, RcDirs]):
     selected, _ = pick(options, title)
     logger.info(f"Selected and applying: {my_repos[selected]}")
     rc_dirs.change_current_to_repo(my_repos[selected])
-    # TODO, should just just be part of change_current_to_target?
-    rc_dirs.link_files()
 
 
 if __name__ == "__main__":
