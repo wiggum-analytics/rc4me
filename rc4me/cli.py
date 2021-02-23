@@ -16,26 +16,21 @@ logger = logging.getLogger(__name__)
 @click.group()
 # Allow calling function without an argument for --revert or --reset options
 @click.option("--dest", type=click.Path())
-@click.option("--home", type=click.Path())
 @click.pass_context
 def cli(
     ctx: Dict[str, RcManager],
-    home: Optional[str] = None,
     dest: Optional[str] = None,
 ) -> None:
     """Management for rc4me run commands."""
     # If the command was called without any arguments or options
     ctx.ensure_object(dict)
-    if home is None:
-        home = Path.home() / ".rc4me"
-    else:
-        home = Path(home)
     if dest is None:
         dest = Path.home()
     else:
         dest = Path(dest)
 
-    ctx.obj["rcmanager"] = RcManager(home, dest)
+    home = Path.home() / ".rc4me"
+    ctx.obj["rcmanager"] = RcManager(home=home, dest=dest)
 
 
 @click.argument("repo", required=True, type=str)
