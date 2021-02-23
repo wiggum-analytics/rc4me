@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
-class RcDirs:
+class RcManager:
     """Class for storing and manipulating rc4me home directory structure."""
 
     def __init__(self, rc4me_home: Path, rc4me_dest: Path):

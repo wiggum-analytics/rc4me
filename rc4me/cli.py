@@ -7,7 +7,7 @@ from typing import Dict, Optional
 import click
 from pick import pick
 
-from rc4me.util import RcDirs
+from rc4me.rcmanager import RcManager
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 @click.option("--home", type=click.Path())
 @click.pass_context
 def cli(
-    ctx: Dict[str, RcDirs],
+    ctx: Dict[str, RcManager],
     home: Optional[str] = None,
     dest: Optional[str] = None,
 ) -> None:
@@ -35,13 +35,13 @@ def cli(
     else:
         dest = Path(dest)
 
-    ctx.obj["rc_dirs"] = RcDirs(home, dest)
+    ctx.obj["rcmanager"] = RcManager(home, dest)
 
 
 @click.argument("repo", required=True, type=str)
 @cli.command()
 @click.pass_context
-def get(ctx: Dict[str, RcDirs], repo: str):
+def get(ctx: Dict[str, RcManager], repo: str):
     """Switch rc4me environment to target repo.
 
     Replaces rc files in rc4me home directory with symlinks to files located in
@@ -52,33 +52,33 @@ def get(ctx: Dict[str, RcDirs], repo: str):
         repo: Target repo with rc files. May be a local repo or reference a
             GitHub repository (e.g. jeffmm/vimrc).
     """
-    rc_dirs = ctx.obj["rc_dirs"]
+    rcmanager = ctx.obj["rcmanager"]
     # Init repo variables
     logger.info(f"Getting and setting rc4me config: {repo}")
     # Clone repo to rc4me home dir or update existing local config repo
-    rc_dirs.fetch_repo(repo)
+    rcmanager.fetch_repo(repo)
     # Wait to relink current until after fetching repo, since it could fail if
     # the git repo doesn't exist or similar.
-    rc_dirs.change_current_to_fetched_repo()
+    rcmanager.change_current_to_fetched_repo()
 
 
 @cli.command()
 @click.pass_context
-def revert(ctx: Dict[str, RcDirs]):
+def revert(ctx: Dict[str, RcManager]):
     """Revert to previous rc4me configuration.
 
     Removes changes from most recent rc4me command and reverts to previous
     configuration.
     """
     # Init rc4me directory variables
-    rc_dirs = ctx.obj["rc_dirs"]
+    rcmanager = ctx.obj["rcmanager"]
     logger.info("Reverting rc4me config to previous configuration")
-    rc_dirs.change_current_to_prev()
+    rcmanager.change_current_to_prev()
 
 
 @cli.command()
 @click.pass_context
-def reset(ctx: Dict[str, RcDirs]):
+def reset(ctx: Dict[str, RcManager]):
     """Reset to initial rc4me configuration.
 
     Restores the rc4me destination directory rc files to the user's initial
@@ -86,27 +86,27 @@ def reset(ctx: Dict[str, RcDirs]):
     will be copied back into the rc4me destination directory.
     """
     # Init rc4me directory variables
-    rc_dirs = ctx.obj["rc_dirs"]
+    rcmanager = ctx.obj["rcmanager"]
     logger.info("Restoring rc4me config to initial configuration")
-    rc_dirs.change_current_to_init()
+    rcmanager.change_current_to_init()
 
 
 @cli.command()
 @click.pass_context
-def select(ctx: Dict[str, RcDirs]):
+def select(ctx: Dict[str, RcManager]):
     """Swap rc4me configurations
 
     Displays all available repos and allow user to select one
     """
     # Init rc4me directory variables
-    rc_dirs = ctx.obj["rc_dirs"]
-    my_repos = rc_dirs.get_rc_repos()
+    rcmanager = ctx.obj["rcmanager"]
+    my_repos = rcmanager.get_rc_repos()
     # Show all dirs that aren't curr/prev
     title = "Please select the repo/configuration you want to use:"
     options = list(my_repos.keys())
     selected, _ = pick(options, title)
     logger.info(f"Selected and applying: {my_repos[selected]}")
-    rc_dirs.change_current_to_repo(my_repos[selected])
+    rcmanager.change_current_to_repo(my_repos[selected])
 
 
 if __name__ == "__main__":
