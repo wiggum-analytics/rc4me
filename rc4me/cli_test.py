@@ -13,9 +13,9 @@ def check_repo_files_in_home(repo: Path):
             assert f".{f.name}" in home_rcs
 
 
-def test_get():
+def test_apply():
     runner = CliRunner()
-    result = runner.invoke(cli, ["get", "jeffmm/vimrc"])
+    result = runner.invoke(cli, ["apply", "jeffmm/vimrc"])
     assert result.exit_code == 0
     repo = Path("~/.rc4me/jeffmm_vimrc").expanduser()
     assert repo.exists()
@@ -25,11 +25,11 @@ def test_get():
 
 def test_revert():
     runner = CliRunner()
-    result = runner.invoke(cli, ["get", "mstefferson/rc-demo"])
+    result = runner.invoke(cli, ["apply", "mstefferson/rc-demo"])
     assert result.exit_code == 0
     ms_repo = Path("~/.rc4me/mstefferson_rc-demo").expanduser()
     check_repo_files_in_home(ms_repo)
-    result = runner.invoke(cli, ["get", "jeffmm/vimrc"])
+    result = runner.invoke(cli, ["apply", "jeffmm/vimrc"])
     assert result.exit_code == 0
     jm_repo = Path("~/.rc4me/jeffmm_vimrc").expanduser()
     check_repo_files_in_home(jm_repo)
@@ -40,7 +40,7 @@ def test_revert():
 
 def test_reset():
     runner = CliRunner()
-    result = runner.invoke(cli, ["get", "mstefferson/rc-demo"])
+    result = runner.invoke(cli, ["apply", "mstefferson/rc-demo"])
     repo = Path("~/.rc4me/mstefferson_rc-demo").expanduser()
     assert result.exit_code == 0
     result = runner.invoke(cli, ["reset"])
@@ -49,5 +49,5 @@ def test_reset():
     check_repo_files_in_home(repo)
 
 
-def test_get_local():
+def test_apply_local():
     pass

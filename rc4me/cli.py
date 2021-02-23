@@ -15,7 +15,17 @@ logger = logging.getLogger(__name__)
 
 @click.group()
 # Allow calling function without an argument for --revert or --reset options
-@click.option("--dest", type=click.Path())
+@click.option(
+    "--dest",
+    type=click.Path(),
+    default=Path.home(),
+    required=False,
+    help=(
+        "Destination path where run command files are copied/linked to. "
+        "Typically home or current directory"
+    ),
+    show_default=True,
+)
 @click.pass_context
 def cli(
     ctx: Dict[str, RcManager],
@@ -24,11 +34,6 @@ def cli(
     """Management for rc4me run commands."""
     # If the command was called without any arguments or options
     ctx.ensure_object(dict)
-    if dest is None:
-        dest = Path.home()
-    else:
-        dest = Path(dest)
-
     home = Path.home() / ".rc4me"
     ctx.obj["rcmanager"] = RcManager(home=home, dest=dest)
 
@@ -36,8 +41,8 @@ def cli(
 @click.argument("repo", required=True, type=str)
 @cli.command()
 @click.pass_context
-def get(ctx: Dict[str, RcManager], repo: str):
-    """Switch rc4me environment to target repo.
+def apply(ctx: Dict[str, RcManager], repo: str):
+    """Apply rc environment. Will download from GitHub if not found in .rc4me/
 
     Replaces rc files in rc4me home directory with symlinks to files located in
     target repo. If the target repo does not exist in the rc4me home directory,
@@ -89,7 +94,7 @@ def reset(ctx: Dict[str, RcManager]):
 @cli.command()
 @click.pass_context
 def select(ctx: Dict[str, RcManager]):
-    """Swap rc4me configurations
+    """Select rc4me configurations.
 
     Displays all available repos and allow user to select one
     """
