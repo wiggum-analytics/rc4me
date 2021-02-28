@@ -17,8 +17,8 @@ class RcManager:
     def __init__(self, home: Path = Path.home() / ".rc4me", dest: Path = Path.home()):
         """Initialize paths to home and source rc4me config repos.
 
-        Creates attributes `source`, which is the path to the
-        local config repo that will be copied to the user's target
+        Creates attributes `home`, `dest`, `repo_path`, which is the path to
+        the local config repo that will be copied to the user's target
         directory.
 
         Args:
