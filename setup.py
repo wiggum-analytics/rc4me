@@ -7,7 +7,7 @@ setup(
     description="Description",
     url="",
     packages=find_packages(),
-    install_requires=["click>=7.1.2", "pick>=1.0.0"],
+    install_requires=["click>=7.1.2", "pick>=1.0.0", "gitpython>=3.1.11"],
     python_requires=">=3.8",
     license="MIT License",
     entry_points="""
