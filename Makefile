@@ -33,3 +33,6 @@ black: build-docker ## Runs black auto-formater
 
 format: isort black ## Lints repo; runs black and isort on all files
 	@echo "Linting complete"
+
+install:
+	pip install .
