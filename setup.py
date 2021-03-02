@@ -5,7 +5,6 @@ setup(
     author="Michael Stefferson/Jeffrey Moore",
     author_email="mstefferson@gmail.com",
     description="Description",
-    url="",
     packages=find_packages(),
     install_requires=["click>=7.1.2", "pick>=1.0.0"],
     python_requires=">=3.8",
