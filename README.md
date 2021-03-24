@@ -2,7 +2,7 @@
 
 [![Continuous Integration](https://github.com/wiggums-analytics/rc4me/actions/workflows/ci.yml/badge.svg)](https://github.com/wiggums-analytics/rc4me/actions/workflows/ci.yml)
 
-Run Commands 4 Me: Quickly and easily set up your run commands files
+Run Commands 4 Me: Quickly and easily set up your run command files.
 
 ## Project description
 
@@ -13,16 +13,20 @@ different dev boxes, you may be interested in this package.  With a single comma
 are all set!
 
 Example:
+
 "M, check out this new vim plugin I've been using"-J
+
 ...M runs an `rc4me apply` command...
+
 "Cool dude, but not for me"-M
+
 ...M reverts to his work environment using `rc4me revert`...
 
 ## Setup
 
 There are two pieces of the set-up:
 1. installing the package
-2. 2. setting up a git repo with your run commands.
+2. setting up a git repo with your run commands.
 
 ### 1. Install
 #### pip
@@ -35,7 +39,7 @@ pip install rc4me
 
 #### From source
 
-To install from source, you'll need to run a git clone then a local `pip` install (done
+To install from source, you'll need to run a git clone followed by a local `pip` install (done
 as a `make` command):
 
 ```
@@ -72,7 +76,7 @@ If you want to reset everything:
 rc4me reset
 ```
 
-Note, `reset` will reset the configuration that `rc4me` saw when running it's first
+Note, `reset` will reset the configuration that `rc4me` saw when running its first
 command.
 
 
@@ -93,7 +97,7 @@ For help on a specific command (e.g., `apply`):
 rc4me apply --help
 ```
 
-## What is rcm4e doing?
+## What is rc4me doing?
 
 `rc4me` downloads files for github and soft-links them on you computer. All the files
 `rc4me` interacts with are saved in `~/.rc4me/`. `rc4me` softlinks files to the user
